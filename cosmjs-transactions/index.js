@@ -4,15 +4,7 @@ import { assertIsDeliverTxSuccess, SigningStargateClient } from '@cosmjs/stargat
 const MINIMAL_DENOM = 10**9
 const MINIMAL_DENOM_LITERAL = 'ncheq'
 const MAINNET_BLOCK_EXPLORER = 'https://explorer.cheqd.io'
-const FEE = {
-  amount: [
-    {
-      denom: 'ncheq',
-      amount: '3000000'
-    },
-  ],
-  gas: '100000'
-}
+const GAS_PRICE = GasPrice.fromString("25ncheq")
 
 const mnemonic = process.env.CF_DISTRIBUTOR_1_MNEMONIC
 
@@ -107,7 +99,7 @@ async function broadcast_tx(recipient, amount_in_maximal_denom) {
     account.address,
     recipient,
     [ amount ],
-    FEE,
+    "auto",
   )
 
   assertIsDeliverTxSuccess( result )

@@ -50,6 +50,8 @@ async function handleRequest(request) {
 async function process_claim(address) {
   let entry = await fetch_qualified_entry( address )
 
+  if( has_submitted_a_withdrawal( address ) ) return false
+
   return await enqueue_transaction( entry.address, entry.entry )
 }
 
@@ -118,6 +120,14 @@ async function fetch_qualified_entry(address) {
     address: address,
     entry: JSON.parse( await community_airdrop.get( address ) )
   }
+}
+
+async function has_submitted_a_withdrawal(address) {
+  const withdrawal = await withdrawal_transactions_queue.get( address )
+
+  if( !withdrawal ) return false
+
+  return true
 }
 
 async function enqueue_transaction(address, entry) {

@@ -1,19 +1,11 @@
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing'
-import { assertIsDeliverTxSuccess, SigningStargateClient } from '@cosmjs/stargate'
+import { assertIsDeliverTxSuccess, SigningStargateClient, GasPrice } from '@cosmjs/stargate'
 import asyncPool from 'tiny-async-pool'
 
 const MINIMAL_DENOM = 10**9
 const MINIMAL_DENOM_LITERAL = 'ncheq'
 const MAINNET_BLOCK_EXPLORER = 'https://explorer.cheqd.io'
-const FEE = {
-  amount: [
-    {
-      denom: 'ncheq',
-      amount: '3000000'
-    },
-  ],
-  gas: '100000'
-}
+const GAS_PRICE = GasPrice.fromString( `25${MINIMAL_DENOM_LITERAL}` )
 
 const NUMBER_OF_DISTRIBUTORS = 2
 const mnemonics = [
@@ -60,6 +52,10 @@ async function process_transactions(keys) {
       transactions.length = 0
     }
   }
+
+  if( transactions.length > 0 ) await process_pool( transactions )
+
+  // No need to reset enqueued transactions array. End of execution.
 
   return true
 }
@@ -125,7 +121,7 @@ async function broadcast_tx(recipient, amount_in_maximal_denom, distributor_numb
 
   const [ account ] = await wallet.getAccounts()
 
-  const client = await SigningStargateClient.connectWithSigner( RPC_ENDPOINT, wallet )
+  const client = await SigningStargateClient.connectWithSigner( RPC_ENDPOINT, wallet, { gasPrice: GAS_PRICE } )
 
   const amount = {
     denom: MINIMAL_DENOM_LITERAL,
@@ -136,7 +132,7 @@ async function broadcast_tx(recipient, amount_in_maximal_denom, distributor_numb
     account.address,
     recipient,
     [ amount ],
-    FEE,
+    'auto',
   )
 
   assertIsDeliverTxSuccess( result )

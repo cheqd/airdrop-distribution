@@ -1,28 +1,24 @@
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing'
-import { assertIsDeliverTxSuccess, SigningStargateClient } from '@cosmjs/stargate'
+import { assertIsDeliverTxSuccess, SigningStargateClient, GasPrice } from '@cosmjs/stargate'
+import asyncPool from 'tiny-async-pool'
 
 const MINIMAL_DENOM = 10**9
 const MINIMAL_DENOM_LITERAL = 'ncheq'
 const MAINNET_BLOCK_EXPLORER = 'https://explorer.cheqd.io'
-const GAS_PRICE = GasPrice.fromString("25ncheq")
+const GAS_PRICE = GasPrice.fromString( `25${MINIMAL_DENOM_LITERAL}` )
 
-const mnemonic = process.env.CF_DISTRIBUTOR_1_MNEMONIC
-
-var state = {
-  distributor_1: {
-    busy: false
-  },
-  distributor_2: {
-    busy: false
-  },
-}
+const NUMBER_OF_DISTRIBUTORS = 2
+const mnemonics = [
+  process.env.CF_DISTRIBUTOR_1_MNEMONIC,
+  process.env.CF_DISTRIBUTOR_2_MNEMONIC,
+]
 
 addEventListener('scheduled', event => {
   event.waitUntil(handleScheduled(event));
 })
 
 async function handleScheduled(event) {
-  return await process_queue()
+  await process_queue()
 }
 
 async function process_queue() {
@@ -36,18 +32,55 @@ async function list_pending_transactions() {
 }
 
 async function process_transactions(keys) {
+  let transactions = []
+
   for( let [i, key] of keys.entries() ){
     const recipient = key.name
-    const pending_transaction = JSON.parse( await withdrawal_transactions_queue.get( key.name ) )
+    const pending_transaction = JSON.parse( await withdrawal_transactions_queue.get( recipient ) )
 
-    const { tx_hash } = await broadcast_tx( recipient, pending_transaction.amount )
+    transactions.push(
+      {
+        recipient: recipient,
+        amount: pending_transaction.amount,
+        assigned_to_distributor: transactions.length
+      }
+    )
 
-    await enlist_successful_withdrawal( recipient, tx_hash, pending_transaction.amount )
+    if( ( i + 1 ) % NUMBER_OF_DISTRIBUTORS === 0 ){
+      const tx_hashes = await process_pool( transactions )
 
-    await delete_processed_enqueued_transaction( recipient )
+      transactions.length = 0
+    }
   }
 
+  if( transactions.length > 0 ) await process_pool( transactions )
+
+  // No need to reset enqueued transactions array. End of execution.
+
   return true
+}
+
+async function process_pool(transactions) {
+  return await asyncPool(
+    NUMBER_OF_DISTRIBUTORS,
+    transactions,
+    execute_transactional_logic
+  )
+}
+
+async function execute_transactional_logic(transaction) {
+  return new Promise(
+    async function(resolve){
+      const { recipient, amount, assigned_to_distributor } = transaction
+      const { tx_hash } = await broadcast_tx( recipient, amount, assigned_to_distributor )
+
+      await enlist_successful_withdrawal( recipient, tx_hash, amount )
+
+      await delete_processed_enqueued_transaction( recipient )
+
+      resolve( tx_hash )
+    }
+  )
 }
 
 async function enlist_successful_withdrawal(address, tx_hash, amount) {
@@ -83,12 +116,12 @@ async function delete_processed_enqueued_transaction(address) {
   return true
 }
 
-async function broadcast_tx(recipient, amount_in_maximal_denom) {
-  const wallet = await DirectSecp256k1HdWallet.fromMnemonic( mnemonic, { prefix: 'cheqd' } )
+async function broadcast_tx(recipient, amount_in_maximal_denom, distributor_number) {
+  const wallet = await DirectSecp256k1HdWallet.fromMnemonic( mnemonics[ distributor_number ], { prefix: 'cheqd' } )
 
   const [ account ] = await wallet.getAccounts()
 
-  const client = await SigningStargateClient.connectWithSigner( RPC_ENDPOINT, wallet )
+  const client = await SigningStargateClient.connectWithSigner( RPC_ENDPOINT, wallet, { gasPrice: GAS_PRICE } )
 
   const amount = {
     denom: MINIMAL_DENOM_LITERAL,
@@ -99,7 +132,7 @@ async function broadcast_tx(recipient, amount_in_maximal_denom) {
     account.address,
     recipient,
     [ amount ],
-    "auto",
+    'auto',
   )
 
   assertIsDeliverTxSuccess( result )

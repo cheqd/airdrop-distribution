@@ -13,7 +13,7 @@ const HEADERS = {
 }
 
 const MESSAGES = {
-  invalid: 'Invalid address provided or not qualified for this stage of the airdrop.',
+  invalid: 'Invalid address provided or not qualified for this stage of the airdrop or you have already submitted a withdrawal request.',
   valid: 'Thank you for participating on this round! Your transaction will be processed in the next 24 hours.'
 }
 
@@ -26,13 +26,32 @@ addEventListener('fetch', event => {
  */
 async function handleRequest(request) {
   const url = parse_url_to_base_class(request.url)
-  const address = url.pathname.replace('/claim/','').replace('/','')
+  const route = url.pathname
+  const address = url.pathname.replace('/claim/','').replace('/calculate/','').replace('/','')
 
-  if( !address || !validate_address( address ) || !( await validate_account( address ) ) || await is_denied( address ) || !( await is_qualified( address ) ) ) return new Response( JSON.stringify( {valid: false, message: MESSAGES.invalid} ), { headers: HEADERS.json } )
+  if( !address || !validate_address( address ) || !( await validate_account( address ) ) || await is_denied( address ) || !( await is_qualified( address ) ) ) return new Response( JSON.stringify( { valid: false, message: MESSAGES.invalid } ), { headers: HEADERS.json } )
+
+  if( RegExp( 'calculate' ).test( route ) ) {
+    const calculate = await calculate_eligible( address )
+
+    if( !calculate ) return new Response( JSON.stringify( { valid: false, message: MESSAGES.invalid } ), { headers: HEADERS.json } )
+
+    return new Response(
+      JSON.stringify(
+        {
+          valid: true,
+          breakdown: calculate
+        }
+      ),
+      {
+        headers: HEADERS.json
+      }
+    )
+  }
 
   const claim = await process_claim( address )
 
-  if( !claim ) return new Response( JSON.stringify( {valid: false, message: MESSAGES.invalid} ), { headers: HEADERS.json } )
+  if( !claim ) return new Response( JSON.stringify( { valid: false, message: MESSAGES.invalid } ), { headers: HEADERS.json } )
 
   return new Response(
     JSON.stringify(
@@ -47,10 +66,18 @@ async function handleRequest(request) {
   )
 }
 
+async function calculate_eligible(address) {
+  const entry = await fetch_qualified_entry( address )
+
+  if( !entry ) return false
+
+  return { ...entry.entry.breakdown, total: entry.entry.reward }
+}
+
 async function process_claim(address) {
   let entry = await fetch_qualified_entry( address )
 
-  if( has_submitted_a_withdrawal( address ) ) return false
+  if( await has_submitted_a_withdrawal( address ) ) return false
 
   return await enqueue_transaction( entry.address, entry.entry )
 }

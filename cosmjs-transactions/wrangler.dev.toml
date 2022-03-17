@@ -1,0 +1,27 @@
+name = "cosmjs-transactions"
+type = "webpack"
+
+account_id = "<insert_your_account_id>"
+workers_dev = true
+route = ""
+zone_id = "<insert_your_zone_id>"
+compatibility_date = "<insert_date_compatible_from>"
+
+kv_namespaces = [ 
+    { binding = "community_airdrop", id = "<auto_generated_id>", preview_id = "<auto_generated_preview_id>" },
+    { binding = "withdrawal_transactions_queue", id = "<auto_generated_id>", preview_id = "<auto_generated_preview_id>" }
+]
+
+# [vars]
+# CF_RPC_ENDPOINT = "<insert_your_rpc_endpoint>"
+# CF_NUMBER_OF_DISTRIBUTORS = 2
+# CF_MAX_SAFE_TX_PER_BLOCK = 4
+
+# the following are encrypted
+# ***REMOVED*** = "<mnemonic_1>,<mnemonic_2>,...,<mnemonic_n>"
+
+[build]
+command = "npm install && npm run build"
+
+[build.upload]
+format = "service-worker"

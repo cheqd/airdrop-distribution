@@ -7,11 +7,16 @@ const MINIMAL_DENOM_LITERAL = 'ncheq'
 const MAINNET_BLOCK_EXPLORER = 'https://explorer.cheqd.io'
 const GAS_PRICE = GasPrice.fromString( `25${MINIMAL_DENOM_LITERAL}` )
 
-const NUMBER_OF_DISTRIBUTORS = 2
-const mnemonics = [
-  process.env.CF_DISTRIBUTOR_1_MNEMONIC,
-  process.env.CF_DISTRIBUTOR_2_MNEMONIC,
-]
+const MAX_PROCESSING_LIMIT = CF_NUMBER_OF_DISTRIBUTORS * CF_MAX_SAFE_TX_PER_BLOCK * 6 // With 6 being the *average* block time. Avoided to add another GraphQL call on top.
+const MNEMONICS = (function() {
+  return String( CF_MNEMONICS ).split(',').map(
+    function(_d){
+      if( !_d ) throw new Error(`Distributor #${n} mnemonic is not set. Exiting.`)
+
+      return _d
+    }
+  )
+})()
 
 addEventListener('scheduled', event => {
   event.waitUntil(handleScheduled(event));
@@ -19,16 +24,28 @@ addEventListener('scheduled', event => {
 
 async function handleScheduled(event) {
   await process_queue()
+
+  return true
 }
 
 async function process_queue() {
-  const list = await list_pending_transactions()
+  const list = await catch_rejections( list_pending_transactions )
+
+  if( !list ) return true
 
   return process_transactions( list )
 }
 
+async function catch_rejections(callable) {
+  try {
+    return await callable()
+  } catch(e) {
+    return false
+  }
+}
+
 async function list_pending_transactions() {
-  return ( await withdrawal_transactions_queue.list() ).keys
+  return ( await withdrawal_transactions_queue.list( { limit: MAX_PROCESSING_LIMIT } ) ).keys
 }
 
 async function process_transactions(keys) {
@@ -46,7 +63,7 @@ async function process_transactions(keys) {
       }
     )
 
-    if( ( i + 1 ) % NUMBER_OF_DISTRIBUTORS === 0 ){
+    if( ( i + 1 ) % CF_NUMBER_OF_DISTRIBUTORS === 0 ){
       const tx_hashes = await process_pool( transactions )
 
       transactions.length = 0
@@ -62,7 +79,7 @@ async function process_transactions(keys) {
 
 async function process_pool(transactions) {
   return await asyncPool(
-    NUMBER_OF_DISTRIBUTORS,
+    transactions.length < CF_NUMBER_OF_DISTRIBUTORS ? transactions.length : CF_NUMBER_OF_DISTRIBUTORS,
     transactions,
     execute_transactional_logic
   )
@@ -71,14 +88,18 @@ async function process_pool(transactions) {
 async function execute_transactional_logic(transaction) {
   return new Promise(
     async function(resolve){
-      const { recipient, amount, assigned_to_distributor } = transaction
-      const { tx_hash } = await broadcast_tx( recipient, amount, assigned_to_distributor )
+      try {
+        const { recipient, amount, assigned_to_distributor } = transaction
+        const { tx_hash } = await broadcast_tx( recipient, amount, assigned_to_distributor )
 
-      await enlist_successful_withdrawal( recipient, tx_hash, amount )
+        await enlist_successful_withdrawal( recipient, tx_hash, amount )
 
-      await delete_processed_enqueued_transaction( recipient )
+        await delete_processed_enqueued_transaction( recipient )
 
-      resolve( tx_hash )
+        resolve( tx_hash )
+      } catch(e) {
+        resolve( undefined )
+      }
     }
   )
 }
@@ -100,6 +121,8 @@ async function enlist_successful_withdrawal(address, tx_hash, amount) {
     }
   )
 
+  entry.withdrawals.total_withdrawals = Number( entry.withdrawals.total_withdrawals || 0 ) + 1
+
   await community_airdrop.put( 
     address,
     JSON.stringify(
@@ -117,11 +140,11 @@ async function delete_processed_enqueued_transaction(address) {
 }
 
 async function broadcast_tx(recipient, amount_in_maximal_denom, distributor_number) {
-  const wallet = await DirectSecp256k1HdWallet.fromMnemonic( mnemonics[ distributor_number ], { prefix: 'cheqd' } )
+  const wallet = await DirectSecp256k1HdWallet.fromMnemonic( MNEMONICS[ distributor_number ], { prefix: 'cheqd' } )
 
   const [ account ] = await wallet.getAccounts()
 
-  const client = await SigningStargateClient.connectWithSigner( RPC_ENDPOINT, wallet, { gasPrice: GAS_PRICE } )
+  const client = await SigningStargateClient.connectWithSigner( CF_RPC_ENDPOINT, wallet, { gasPrice: GAS_PRICE } )
 
   const amount = {
     denom: MINIMAL_DENOM_LITERAL,

@@ -12,16 +12,23 @@ const HEADERS = {
   text: { 'Content-Type': 'text/plain' },
 }
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
+  'Access-Control-Max-Age': '86400'
+}
+
 const MESSAGES = {
-  invalid: 'Invalid address provided or not qualified for this stage of the airdrop or you have already submitted a withdrawal request.',
-  valid: 'Thank you for participating on this round! Your transaction will be processed in the next 24 hours.'
+  invalid: 'Invalid address provided or not qualified for this stage of the airdrop.',
+  valid: 'Thank you for participating on this round! Your transaction will be processed in the next 24 hours.',
+  withdrawal: 'You have already submitted a withdrawal request. Please note that due to the volume of distributions to be carried out, it might take a few hours for the CHEQ tokens to be in your wallet. You can check the balance of your wallet on our block explorer.'
 }
 
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request))
 })
 /**
- * Respond with hello worker text
+ * Respond with '/', '/calculate/<address>', '/claim/<address>'
  * @param {Request} request
  */
 async function handleRequest(request) {
@@ -29,12 +36,12 @@ async function handleRequest(request) {
   const route = url.pathname
   const address = url.pathname.replace('/claim/','').replace('/calculate/','').replace('/','')
 
-  if( !address || !validate_address( address ) || !( await validate_account( address ) ) || await is_denied( address ) || !( await is_qualified( address ) ) ) return new Response( JSON.stringify( { valid: false, message: MESSAGES.invalid } ), { headers: HEADERS.json } )
+  if( !address || !validate_address( address ) || !( await validate_account( address ) ) || await is_denied( address ) || !( await is_qualified( address ) ) ) return new Response( JSON.stringify( { valid: false, withdrawn: false, message: MESSAGES.invalid } ), { headers: { ...CORS_HEADERS, ...HEADERS.json } } )
 
   if( RegExp( 'calculate' ).test( route ) ) {
     const calculate = await calculate_eligible( address )
 
-    if( !calculate ) return new Response( JSON.stringify( { valid: false, message: MESSAGES.invalid } ), { headers: HEADERS.json } )
+    if( !calculate ) return new Response( JSON.stringify( { valid: false, message: MESSAGES.invalid } ), { headers: { ...CORS_HEADERS, ...HEADERS.json } } )
 
     return new Response(
       JSON.stringify(
@@ -44,14 +51,18 @@ async function handleRequest(request) {
         }
       ),
       {
-        headers: HEADERS.json
+        headers: { ...CORS_HEADERS, ...HEADERS.json }
       }
     )
   }
 
+  const withdrawal = has_submitted_a_withdrawal( address )
+
+  if( withdrawal ) return new Response( JSON.stringify( { valid: true, withdrawn: true, message: MESSAGES.withdrawal } ), { headers: { ...CORS_HEADERS, ...HEADERS.json } } )
+
   const claim = await process_claim( address )
 
-  if( !claim ) return new Response( JSON.stringify( { valid: false, message: MESSAGES.invalid } ), { headers: HEADERS.json } )
+  if( !claim ) return new Response( JSON.stringify( { valid: false, withdrawn: false, message: MESSAGES.invalid } ), { headers: { ...CORS_HEADERS, ...HEADERS.json } } )
 
   return new Response(
     JSON.stringify(
@@ -61,7 +72,7 @@ async function handleRequest(request) {
       }
     ),
     {
-      headers: HEADERS.json
+      headers: { ...CORS_HEADERS, ...HEADERS.json }
     }
   )
 }
@@ -76,8 +87,6 @@ async function calculate_eligible(address) {
 
 async function process_claim(address) {
   let entry = await fetch_qualified_entry( address )
-
-  if( await has_submitted_a_withdrawal( address ) ) return false
 
   return await enqueue_transaction( entry.address, entry.entry )
 }
@@ -150,9 +159,11 @@ async function fetch_qualified_entry(address) {
 }
 
 async function has_submitted_a_withdrawal(address) {
-  const withdrawal = await withdrawal_transactions_queue.get( address )
+  const withdrawal_request = await withdrawal_transactions_queue.get( address )
 
-  if( !withdrawal ) return false
+  const withdrawals_processed = JSON.parse( await community_airdrop.get( address ) ).withdrawals.total_withdrawals
+
+  if( !withdrawal_request || withdrawals_processed === 0 ) return false
 
   return true
 }

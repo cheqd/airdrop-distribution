@@ -10,8 +10,8 @@ const GAS_PRICE = GasPrice.fromString( `25${MINIMAL_DENOM_LITERAL}` )
 const MAX_PROCESSING_LIMIT = CF_NUMBER_OF_DISTRIBUTORS * CF_MAX_SAFE_TX_PER_BLOCK * 6 // With 6 being the *average* block time. Avoided to add another GraphQL call on top.
 const MNEMONICS = (function() {
   return String( CF_MNEMONICS ).split(',').map(
-    function(_d){
-      if( !_d ) throw new Error(`Distributor #${n} mnemonic is not set. Exiting.`)
+    function(_d,_){
+      if( !_d ) throw new Error(`Distributor #${_} mnemonic is not set. Exiting.`)
 
       return _d
     }

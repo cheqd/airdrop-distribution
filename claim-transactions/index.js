@@ -68,6 +68,7 @@ async function handleRequest(request) {
     JSON.stringify(
       {
         valid: true,
+        withdrawn: true,
         message: MESSAGES.valid
       }
     ),

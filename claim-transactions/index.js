@@ -143,10 +143,6 @@ async function is_qualified(address) {
 
   if( !address ) return false
 
-  let entry = JSON.parse( await community_airdrop.get( address ) )
-
-  if( !( entry?.reward > 0 ) ) return false 
-
   return true
 }
 

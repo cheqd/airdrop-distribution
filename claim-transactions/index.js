@@ -36,7 +36,7 @@ async function handleRequest(request) {
   const route = url.pathname
   const address = url.pathname.replace('/claim/','').replace('/calculate/','').replace('/','')
 
-  if( !address || !validate_address( address ) || !( await validate_account( address ) ) || await is_denied( address ) || !( await is_qualified( address ) ) ) return new Response( JSON.stringify( { valid: false, withdrawn: false, message: MESSAGES.invalid } ), { headers: { ...CORS_HEADERS, ...HEADERS.json } } )
+  if( !address || !validate_address( address ) || await is_denied( address ) || !( await is_qualified( address ) ) ) return new Response( JSON.stringify( { valid: false, withdrawn: false, message: MESSAGES.invalid } ), { headers: { ...CORS_HEADERS, ...HEADERS.json } } )
 
   if( RegExp( 'calculate' ).test( route ) ) {
     const calculate = await calculate_eligible( address )

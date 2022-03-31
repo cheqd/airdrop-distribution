@@ -9,7 +9,11 @@ compatibility_date = "2022-03-15"
 
 kv_namespaces = [ 
     { binding = "community_airdrop", id = "f42e3da0c31744c7b0b0b3879b6dd0cc", preview_id = "f42e3da0c31744c7b0b0b3879b6dd0cc" },
-    { binding = "withdrawal_transactions_queue", id = "26da33ddd6fd4a94898dd84094f5a9c6", preview_id = "26da33ddd6fd4a94898dd84094f5a9c6" }
+    { binding = "community_airdrop_reclaims", id = "c9b115b877b5412791a0eca7bd0287e8", preview_id = "c9b115b877b5412791a0eca7bd0287e8" },
+    { binding = "withdrawal_transactions_queue", id = "26da33ddd6fd4a94898dd84094f5a9c6", preview_id = "26da33ddd6fd4a94898dd84094f5a9c6" },
+    { binding = "withdrawal_queue_1", id = "afec3ddf42da4bf3afedfd12c15b3ea0", preview_id = "afec3ddf42da4bf3afedfd12c15b3ea0" },
+    { binding = "withdrawal_queue_2", id = "390e6f36fa4644999e93d6dca28f9a69", preview_id = "390e6f36fa4644999e93d6dca28f9a69" },
+    { binding = "withdrawal_queue_3", id = "ea6b81fb0f0c48218c09cca01644d003", preview_id = "ea6b81fb0f0c48218c09cca01644d003" }
 ]
 
 [build]

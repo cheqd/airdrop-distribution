@@ -4,9 +4,9 @@ import asyncPool from 'tiny-async-pool'
 
 const MINIMAL_DENOM = 10**9
 const MINIMAL_DENOM_LITERAL = 'ncheq'
-const MAINNET_BLOCK_EXPLORER = 'https://explorer.cheqd.io'
 const GAS_PRICE = GasPrice.fromString( `25${MINIMAL_DENOM_LITERAL}` )
 
+const WITHDRAWAL_QUEUE_PREFIX = 'queue-1:'
 const MAX_PROCESSING_LIMIT = CF_NUMBER_OF_DISTRIBUTORS * CF_MAX_SAFE_TX_PER_BLOCK * 6 // With 6 being the *average* block time. Avoided to add another GraphQL call on top.
 const MNEMONICS = (function() {
   return String( ***REMOVED*** ).split(',').map(
@@ -18,14 +18,19 @@ const MNEMONICS = (function() {
   )
 })()
 
-addEventListener('scheduled', event => {
-  event.waitUntil(handleScheduled(event));
+addEventListener('fetch', event => {
+  event.respondWith(handleScheduled(event.request));
 })
 
 async function handleScheduled(event) {
   await process_queue()
 
-  return true
+  return new Response(
+    'Finished.',
+    {
+      headers: { 'Content-Type': 'text/plain' }
+    }
+  )
 }
 
 async function process_queue() {
@@ -45,7 +50,7 @@ async function catch_rejections(callable) {
 }
 
 async function list_pending_transactions() {
-  return ( await withdrawal_transactions_queue.list( { limit: MAX_PROCESSING_LIMIT } ) ).keys
+  return ( await withdrawal_transactions_queue.list( { prefix: `${WITHDRAWAL_QUEUE_PREFIX}`, limit: MAX_PROCESSING_LIMIT } ) ).keys
 }
 
 async function process_transactions(keys) {
@@ -57,7 +62,7 @@ async function process_transactions(keys) {
 
     transactions.push(
       {
-        recipient: recipient,
+        recipient: recipient.split(':')[1],
         amount: pending_transaction.amount,
         assigned_to_distributor: transactions.length
       }
@@ -92,9 +97,9 @@ async function execute_transactional_logic(transaction) {
         const { recipient, amount, assigned_to_distributor } = transaction
         const { tx_hash } = await broadcast_tx( recipient, amount, assigned_to_distributor )
 
-        await enlist_successful_withdrawal( recipient, tx_hash, amount )
+        await enlist_successful_withdrawal( recipient, amount )
 
-        await delete_processed_enqueued_transaction( recipient )
+        await delete_processed_enqueued_transaction( `${WITHDRAWAL_QUEUE_PREFIX}${recipient}` )
 
         resolve( tx_hash )
       } catch(e) {
@@ -104,24 +109,11 @@ async function execute_transactional_logic(transaction) {
   )
 }
 
-async function enlist_successful_withdrawal(address, tx_hash, amount) {
-  const date = new Date()
+async function enlist_successful_withdrawal(address, amount) {
   let entry = JSON.parse( await community_airdrop.get( address ) )
-  const diff = Number( entry.reward ) - Number( amount )
 
-  entry.reward = Number( entry.reward ) - Number( amount ) > 0 ? diff : 0 
-
-  entry.withdrawals.successful_withdrawals.push(
-    {
-      amount: amount,
-      tx_hash: tx_hash,
-      tx_explorer_link: `${MAINNET_BLOCK_EXPLORER}/transactions/${tx_hash}`,
-      timestamp: date.getTime(),
-      human_readable_date: date.toISOString()
-    }
-  )
-
-  entry.withdrawals.total_withdrawals = Number( entry.withdrawals.total_withdrawals || 0 ) + 1
+  entry.pending = 0
+  entry.withdrawn = Number( entry.withdrawn || 0 ) + Number( amount )
 
   await community_airdrop.put( 
     address,

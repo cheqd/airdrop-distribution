@@ -24,6 +24,12 @@ const MESSAGES = {
   withdrawal: 'You have already submitted a withdrawal request. Please note that due to the volume of distributions to be carried out, it might take a few hours for the CHEQ tokens to be in your wallet. You can check the balance of your wallet on our block explorer.'
 }
 
+const WITHDRAWAL_QUEUES = {
+  'queue-1': withdrawal_transactions_queue,
+  /* 'queue-2': withdrawal_queue_1,
+  'queue-3': withdrawal_queue_2, */
+}
+
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request))
 })
@@ -43,10 +49,15 @@ async function handleRequest(request) {
 
     if( !calculate ) return new Response( JSON.stringify( { valid: false, message: MESSAGES.invalid } ), { headers: { ...CORS_HEADERS, ...HEADERS.json } } )
 
+    const withdrawal = await has_submitted_a_withdrawal( address )
+
+    if( withdrawal ) return new Response( JSON.stringify( { valid: true, withdrawn: true, message: MESSAGES.withdrawal } ), { headers: { ...CORS_HEADERS, ...HEADERS.json } } )
+
     return new Response(
       JSON.stringify(
         {
           valid: true,
+          withdrawn: false,
           breakdown: calculate
         }
       ),
@@ -56,7 +67,7 @@ async function handleRequest(request) {
     )
   }
 
-  const withdrawal = has_submitted_a_withdrawal( address )
+  const withdrawal = await has_submitted_a_withdrawal( address )
 
   if( withdrawal ) return new Response( JSON.stringify( { valid: true, withdrawn: true, message: MESSAGES.withdrawal } ), { headers: { ...CORS_HEADERS, ...HEADERS.json } } )
 
@@ -81,9 +92,17 @@ async function handleRequest(request) {
 async function calculate_eligible(address) {
   const entry = await fetch_qualified_entry( address )
 
-  if( !entry ) return false
+  if( !entry || !entry?.entry || !entry?.entry?.breakdown ) return false
 
-  return { ...entry.entry.breakdown, total: entry.entry.reward }
+  const withdrawn = entry?.entry?.withdrawn
+  const pending = entry?.entry?.pending
+  const total = entry?.entry?.total
+
+  if( withdrawn + pending >= total ) {
+    return { ...entry.entry.breakdown, total: total, withdrawn: withdrawn }
+  }
+
+  return { ...entry.entry.breakdown, total: total, withdrawn: 0 }
 }
 
 async function process_claim(address) {
@@ -156,29 +175,52 @@ async function fetch_qualified_entry(address) {
 }
 
 async function has_submitted_a_withdrawal(address) {
-  const withdrawal_request = await withdrawal_transactions_queue.get( address )
+  const entry = JSON.parse( await community_airdrop.get( address ) )
 
-  const withdrawals_processed = JSON.parse( await community_airdrop.get( address ) ).withdrawals.total_withdrawals
+  const can_withdraw = entry.withdrawn + entry.pending < entry.total
 
-  if( !withdrawal_request || withdrawals_processed === 0 ) return false
+  if( !can_withdraw ) return true
 
-  return true
+  return false
 }
 
 async function enqueue_transaction(address, entry) {
-  try {
-    await withdrawal_transactions_queue.put(
-      address,
+  /* try { */
+    const queue = random_queue()
+    const amount = Number( entry.total ) - Number( entry.withdrawn )
+
+    await queue.pool.put(
+      `${queue.prefix}:${address}`,
       JSON.stringify(
         {
-          amount: entry.reward,
+          amount: amount,
           timestamp: (new Date()).getTime()
         }
       )
     )
-  } catch(e) {
+
+    entry.pending = amount
+    await community_airdrop.put(
+      address,
+      JSON.stringify( entry )
+    )
+  /* } catch(e) {
     return false
-  }
+  } */
 
   return true
+}
+
+function random_queue() {
+  const pools = Object.keys( WITHDRAWAL_QUEUES )
+  const prefix = pools[
+    Math.floor(
+      Math.random() * pools.length
+    )
+  ]
+
+  return {
+    prefix: prefix,
+    pool: WITHDRAWAL_QUEUES[ prefix ]
+  }
 }

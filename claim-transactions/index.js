@@ -26,8 +26,8 @@ const MESSAGES = {
 
 const WITHDRAWAL_QUEUES = {
   'queue-1': withdrawal_queue_test,
-  /* 'queue-2': withdrawal_queue_1,
-  'queue-3': withdrawal_queue_2, */
+  'queue-2': withdrawal_queue_test,
+  'queue-3': withdrawal_queue_test,
 }
 
 addEventListener('fetch', event => {

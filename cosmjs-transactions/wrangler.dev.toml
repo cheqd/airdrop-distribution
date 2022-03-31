@@ -9,7 +9,7 @@ compatibility_date = "<insert_date_compatible_from>"
 
 kv_namespaces = [ 
     { binding = "community_airdrop", id = "<auto_generated_id>", preview_id = "<auto_generated_preview_id>" },
-    { binding = "withdrawal_transactions_queue", id = "<auto_generated_id>", preview_id = "<auto_generated_preview_id>" }
+    { binding = "withdrawal-queue-test", id = "<auto_generated_id>", preview_id = "<auto_generated_preview_id>" }
 ]
 
 # [vars]

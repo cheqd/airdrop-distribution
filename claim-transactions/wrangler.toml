@@ -4,16 +4,12 @@ type = "javascript"
 account_id = "99b9572de9d3c33774965949416b82c9"
 workers_dev = true
 route = ""
-zone_id = "afe3b66243382f27140e6feeaae848b5"
+zone_id = "88e06eefedbbd140a12ac3dd1b21a7af"
 compatibility_date = "2022-03-15"
 
 kv_namespaces = [ 
-    { binding = "community_airdrop", id = "f42e3da0c31744c7b0b0b3879b6dd0cc", preview_id = "f42e3da0c31744c7b0b0b3879b6dd0cc" },
-    { binding = "community_airdrop_reclaims", id = "c9b115b877b5412791a0eca7bd0287e8", preview_id = "c9b115b877b5412791a0eca7bd0287e8" },
-    { binding = "withdrawal_transactions_queue", id = "26da33ddd6fd4a94898dd84094f5a9c6", preview_id = "26da33ddd6fd4a94898dd84094f5a9c6" },
-    { binding = "withdrawal_queue_1", id = "afec3ddf42da4bf3afedfd12c15b3ea0", preview_id = "afec3ddf42da4bf3afedfd12c15b3ea0" },
-    { binding = "withdrawal_queue_2", id = "390e6f36fa4644999e93d6dca28f9a69", preview_id = "390e6f36fa4644999e93d6dca28f9a69" },
-    { binding = "withdrawal_queue_3", id = "ea6b81fb0f0c48218c09cca01644d003", preview_id = "ea6b81fb0f0c48218c09cca01644d003" }
+    { binding = "reward-tiers-test", id = "1639b8f774be47a08e25b160871cd8fe", preview_id = "1639b8f774be47a08e25b160871cd8fe" },
+    { binding = "withdrawal-queue-test", id = "cd1c4cf6dcb14bb0b8d6985a91b8812f", preview_id = "cd1c4cf6dcb14bb0b8d6985a91b8812f" }
 ]
 
 [build]

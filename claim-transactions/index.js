@@ -102,7 +102,7 @@ async function calculate_eligible(address) {
     return { ...entry.entry.breakdown, total: total, withdrawn: withdrawn }
   }
 
-  return { ...entry.entry.breakdown, total: total, withdrawn: 0 }
+  return { ...entry.entry.breakdown, total: total, withdrawn: withdrawn }
 }
 
 async function process_claim(address) {

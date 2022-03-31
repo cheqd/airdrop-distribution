@@ -25,7 +25,7 @@ const MESSAGES = {
 }
 
 const WITHDRAWAL_QUEUES = {
-  'queue-1': withdrawal-queue-test,
+  'queue-1': withdrawal_queue_test,
   /* 'queue-2': withdrawal_queue_1,
   'queue-3': withdrawal_queue_2, */
 }
@@ -116,7 +116,7 @@ function parse_url_to_base_class(url) {
 }
 
 async function is_denied(address) {
-  const denylist = Object.keys( JSON.parse( await community_airdrop.get( 'denylist' ) ) )
+  const denylist = Object.keys( JSON.parse( await reward_tiers_test.get( 'denylist' ) ) )
 
   for( let entry of denylist ){
     if( entry === address ) return true
@@ -158,7 +158,7 @@ async function fetch_account(address, endpoint) {
 async function is_qualified(address) {
   if( !address ) return false
 
-  if( !is_base_network( address ) ) address = await community_airdrop.get( address )
+  if( !is_base_network( address ) ) address = await reward_tiers_test.get( address )
 
   if( !address ) return false
 
@@ -166,16 +166,16 @@ async function is_qualified(address) {
 }
 
 async function fetch_qualified_entry(address) {
-  if( !is_base_network( address ) ) address = await community_airdrop.get( address )
+  if( !is_base_network( address ) ) address = await reward_tiers_test.get( address )
 
   return {
     address: address,
-    entry: JSON.parse( await community_airdrop.get( address ) )
+    entry: JSON.parse( await reward_tiers_test.get( address ) )
   }
 }
 
 async function has_submitted_a_withdrawal(address) {
-  const entry = JSON.parse( await community_airdrop.get( address ) )
+  const entry = JSON.parse( await reward_tiers_test.get( address ) )
 
   const can_withdraw = entry.withdrawn + entry.pending < entry.total
 
@@ -200,7 +200,7 @@ async function enqueue_transaction(address, entry) {
     )
 
     entry.pending = amount
-    await community_airdrop.put(
+    await reward_tiers_test.put(
       address,
       JSON.stringify( entry )
     )

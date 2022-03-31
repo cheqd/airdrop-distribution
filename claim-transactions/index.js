@@ -14,7 +14,7 @@ const HEADERS = {
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
+  'Access-Control-Allow-Methods': 'GET,OPTIONS',
   'Access-Control-Max-Age': '86400'
 }
 
@@ -25,7 +25,7 @@ const MESSAGES = {
 }
 
 const WITHDRAWAL_QUEUES = {
-  'queue-1': withdrawal_transactions_queue,
+  'queue-1': withdrawal-queue-test,
   /* 'queue-2': withdrawal_queue_1,
   'queue-3': withdrawal_queue_2, */
 }

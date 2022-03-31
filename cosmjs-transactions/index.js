@@ -18,8 +18,8 @@ const MNEMONICS = (function() {
   )
 })()
 
-addEventListener('fetch', event => {
-  event.respondWith(handleScheduled(event.request));
+addEventListener('scheduled', event => {
+  event.waitUntil(handleScheduled(event));
 })
 
 async function handleScheduled(event) {

@@ -99,10 +99,10 @@ async function calculate_eligible(address) {
   const total = entry?.entry?.total
 
   if( withdrawn + pending >= total ) {
-    return { ...entry.entry.breakdown, total: total, withdrawn: withdrawn }
+    return { ...entry.entry.breakdown, total: total, withdrawn: withdrawn, pending: pending }
   }
 
-  return { ...entry.entry.breakdown, total: total, withdrawn: withdrawn }
+  return { ...entry.entry.breakdown, total: total, withdrawn: withdrawn, pending: pending }
 }
 
 async function process_claim(address) {

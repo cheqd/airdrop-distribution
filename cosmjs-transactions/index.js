@@ -110,12 +110,12 @@ async function execute_transactional_logic(transaction) {
 }
 
 async function enlist_successful_withdrawal(address, amount) {
-  let entry = JSON.parse( await community_airdrop.get( address ) )
+  let entry = JSON.parse( await reward_tiers_test.get( address ) )
 
   entry.pending = 0
   entry.withdrawn = Number( entry.withdrawn || 0 ) + Number( amount )
 
-  await community_airdrop.put( 
+  await reward_tiers_test.put( 
     address,
     JSON.stringify(
       entry

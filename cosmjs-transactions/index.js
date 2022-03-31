@@ -25,12 +25,7 @@ addEventListener('scheduled', event => {
 async function handleScheduled(event) {
   await process_queue()
 
-  return new Response(
-    'Finished.',
-    {
-      headers: { 'Content-Type': 'text/plain' }
-    }
-  )
+  return true
 }
 
 async function process_queue() {

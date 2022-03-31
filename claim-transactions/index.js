@@ -185,7 +185,7 @@ async function has_submitted_a_withdrawal(address) {
 }
 
 async function enqueue_transaction(address, entry) {
-  /* try { */
+  try {
     const queue = random_queue()
     const amount = Number( entry.total ) - Number( entry.withdrawn )
 
@@ -204,9 +204,9 @@ async function enqueue_transaction(address, entry) {
       address,
       JSON.stringify( entry )
     )
-  /* } catch(e) {
+  } catch(e) {
     return false
-  } */
+  }
 
   return true
 }

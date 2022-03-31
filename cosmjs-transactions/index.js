@@ -45,7 +45,7 @@ async function catch_rejections(callable) {
 }
 
 async function list_pending_transactions() {
-  return ( await withdrawal-queue-test.list( { prefix: `${WITHDRAWAL_QUEUE_PREFIX}`, limit: MAX_PROCESSING_LIMIT } ) ).keys
+  return ( await withdrawal_queue_test.list( { prefix: `${WITHDRAWAL_QUEUE_PREFIX}`, limit: MAX_PROCESSING_LIMIT } ) ).keys
 }
 
 async function process_transactions(keys) {
@@ -53,7 +53,7 @@ async function process_transactions(keys) {
 
   for( let [i, key] of keys.entries() ){
     const recipient = key.name
-    const pending_transaction = JSON.parse( await withdrawal-queue-test.get( recipient ) )
+    const pending_transaction = JSON.parse( await withdrawal_queue_test.get( recipient ) )
 
     transactions.push(
       {
@@ -121,7 +121,7 @@ async function enlist_successful_withdrawal(address, amount) {
 }
 
 async function delete_processed_enqueued_transaction(address) {
-  await withdrawal-queue-test.delete( address )
+  await withdrawal_queue_test.delete( address )
 
   return true
 }

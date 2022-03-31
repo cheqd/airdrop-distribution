@@ -8,8 +8,8 @@ zone_id = "88e06eefedbbd140a12ac3dd1b21a7af"
 compatibility_date = "2022-03-15"
 
 kv_namespaces = [ 
-    { binding = "reward-tiers-test", id = "1639b8f774be47a08e25b160871cd8fe", preview_id = "1639b8f774be47a08e25b160871cd8fe" },
-    { binding = "withdrawal-queue-test", id = "cd1c4cf6dcb14bb0b8d6985a91b8812f", preview_id = "cd1c4cf6dcb14bb0b8d6985a91b8812f" }
+    { binding = "reward_tiers_test", id = "d8a783f7388d4c6a8a34db1848326505", preview_id = "d8a783f7388d4c6a8a34db1848326505" },
+    { binding = "withdrawal_queue_test", id = "bd03245aabe145c19ab703cea48bd3c7", preview_id = "bd03245aabe145c19ab703cea48bd3c7" }
 ]
 
 [build]

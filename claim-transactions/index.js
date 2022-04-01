@@ -25,9 +25,9 @@ const MESSAGES = {
 }
 
 const WITHDRAWAL_QUEUES = {
-  'queue-1': withdrawal_queue_test,
-  'queue-2': withdrawal_queue_test,
-  'queue-3': withdrawal_queue_test,
+  'queue-1': withdrawal_queue,
+  'queue-2': withdrawal_queue,
+  'queue-3': withdrawal_queue,
 }
 
 addEventListener('fetch', event => {
@@ -156,7 +156,7 @@ async function fetch_account(address, endpoint) {
 async function is_qualified(address) {
   if( !address ) return false
 
-  if( !is_base_network( address ) ) address = await reward_tiers_test.get( address )
+  if( !is_base_network( address ) ) address = await reward_tiers.get( address )
 
   if( !address ) return false
 
@@ -164,16 +164,16 @@ async function is_qualified(address) {
 }
 
 async function fetch_qualified_entry(address) {
-  if( !is_base_network( address ) ) address = await reward_tiers_test.get( address )
+  if( !is_base_network( address ) ) address = await reward_tiers.get( address )
 
   return {
     address: address,
-    entry: JSON.parse( await reward_tiers_test.get( address ) )
+    entry: JSON.parse( await reward_tiers.get( address ) )
   }
 }
 
 async function has_submitted_a_withdrawal(address) {
-  const entry = JSON.parse( await reward_tiers_test.get( address ) )
+  const entry = JSON.parse( await reward_tiers.get( address ) )
 
   const can_withdraw = entry.withdrawn + entry.pending < entry.total
 
@@ -198,7 +198,7 @@ async function enqueue_transaction(address, entry) {
     )
 
     entry.pending = amount
-    await reward_tiers_test.put(
+    await reward_tiers.put(
       address,
       JSON.stringify( entry )
     )

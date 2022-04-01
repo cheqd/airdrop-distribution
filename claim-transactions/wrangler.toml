@@ -13,7 +13,7 @@ kv_namespaces = [
 ]
 
 [build]
-command = "npm install && npm run build"
+command = "npm install && npm run build --env.NODE_ENV=production"
 
 [build.upload]
 format = "service-worker"

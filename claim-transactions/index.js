@@ -20,7 +20,7 @@ const CORS_HEADERS = {
 
 const MESSAGES = {
   invalid: 'Invalid address provided or not qualified for this stage of the airdrop.',
-  valid: 'Thank you for participating on this round! Your transaction will be processed in the next 24 hours.',
+  valid: 'Your claim submission was successfully recorded! Please note that due to the volume of distributions being carried out, it might take up to 24 hours for CHEQ tokens to be in your wallet. You can check the status of your claim on explorer.cheqd.io',
   withdrawal: 'You have already submitted a withdrawal request. Please note that due to the volume of distributions to be carried out, it might take a few hours for the CHEQ tokens to be in your wallet. You can check the balance of your wallet on our block explorer.'
 }
 

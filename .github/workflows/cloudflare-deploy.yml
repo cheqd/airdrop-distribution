@@ -9,21 +9,12 @@ jobs:
   publish-claim-tx:
     name: Publish Claim Transactions to Cloudflare
 
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
-        node: [ 14 ]
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node }}
-
       - name: Checkout
         uses: actions/checkout@master
-      
+
       - name: Publish Claim Transactions to Cloudflare
         uses: cloudflare/wrangler-action@1.3.0
         env:

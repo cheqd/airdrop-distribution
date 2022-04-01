@@ -34,26 +34,3 @@ jobs:
           CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          
-          postCommand: |
-          echo "*** post commands ***"
-          wrangler kv
-          echo "******"
-
-publish-claim-tx:
-  name: Publish Claim Transactions to 
-  needs: build-claim-tx
-  defaults:
-    run:
-      working_directory: claim-transactions
-
-  runs_on: ubuntu-latest
-
-  steps:
-      - name: Load binary artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: claim-tx
-      
-      
-

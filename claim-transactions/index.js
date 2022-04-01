@@ -116,7 +116,7 @@ function parse_url_to_base_class(url) {
 }
 
 async function is_denied(address) {
-  const denylisted = JSON.parse( await denylist.get( address ) )
+  const denylisted = JSON.parse( await airdrop_denylist.get( address ) )
 
   if( denylisted ) return true
 

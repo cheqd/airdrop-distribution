@@ -1,0 +1,30 @@
+name = "airdrop-send-transactions"
+type = "webpack"
+
+account_id = "99b9572de9d3c33774965949416b82c9"
+workers_dev = true
+route = ""
+zone_id = "88e06eefedbbd140a12ac3dd1b21a7af"
+compatibility_date = "2022-03-15"
+
+usage_model = "bundled"
+
+kv_namespaces = [ 
+    { binding = "reward_tiers_test", id = "d8a783f7388d4c6a8a34db1848326505", preview_id = "d8a783f7388d4c6a8a34db1848326505" },
+    { binding = "withdrawal_queue_test", id = "bd03245aabe145c19ab703cea48bd3c7", preview_id = "bd03245aabe145c19ab703cea48bd3c7" }
+]
+
+[vars]
+CF_RPC_ENDPOINT = "https://rpc.cheqd.net:443"
+CF_NUMBER_OF_DISTRIBUTORS = 2
+CF_MAX_SAFE_TX_PER_BLOCK = 2
+
+# the following are encrypted
+***REMOVED*** = "split coach error walk punch siege syrup start depth flee kid short all excess advice pink equip loan retreat crouch drip frog issue charge,behind still tragic duty moment bundle accuse awkward magnet grain reason antique accident steak sport typical exhaust father seven child ready already crew hobby"
+# ***REMOVED*** = "split coach error walk punch siege syrup start depth flee kid short all excess advice pink equip loan retreat crouch drip frog issue charge,behind still tragic duty moment bundle accuse awkward magnet grain reason antique accident steak sport typical exhaust father seven child ready already crew hobby,vague stick infant violin midnight crime wash fork essence endless party collect very knock please foam task twin airport side box gaze error tail,receive empty super universe grocery night unable alcohol bitter joy artefact fold weapon wish mom lawsuit muffin stamp turtle bag auto brave pudding trophy,mystery please daughter poem neutral endorse twice fade afford range stomach auto crazy stuff faith situate point secret humble isolate object execute sword oak"
+
+[build]
+command = "npm install && npm run build"
+
+[build.upload]
+format = "service-worker"

@@ -175,9 +175,9 @@ async function fetch_qualified_entry(address) {
 async function has_submitted_a_withdrawal(address) {
   const entry = JSON.parse( await reward_tiers.get( address ) )
 
-  const can_withdraw = entry.withdrawn + entry.pending < entry.total
+  const cannot_withdraw = entry.withdrawn + entry.pending >= entry.total
 
-  if( !can_withdraw ) return true
+  if( cannot_withdraw ) return true
 
   return false
 }

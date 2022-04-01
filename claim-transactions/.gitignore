@@ -1,5 +1,5 @@
-/target
-/dist
+target/
+dist/
 **/*.rs.bk
 Cargo.lock
 bin/
@@ -8,4 +8,6 @@ wasm-pack.log
 worker/
 node_modules/
 .cargo-ok
+
+# Ignore wrangler sensitive info, expose wrangler.dev.toml as guidelines
 wrangler.toml

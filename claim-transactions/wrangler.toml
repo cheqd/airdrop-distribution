@@ -1,5 +1,5 @@
 name = "claim-transactions"
-type = "javascript"
+type = "webpack"
 
 account_id = ""
 workers_dev = true

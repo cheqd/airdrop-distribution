@@ -1,9 +1,10 @@
 name = "claim-transactions"
-type = "webpack"
+type = "javascript"
 
-account_id = ""
+account_id = "99b9572de9d3c33774965949416b82c9"
 workers_dev = true
-zone_id = ""
+route = ""
+zone_id = "88e06eefedbbd140a12ac3dd1b21a7af"
 compatibility_date = "2022-03-15"
 
 kv_namespaces = [ 

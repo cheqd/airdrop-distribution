@@ -6,7 +6,6 @@ const MINIMAL_DENOM = 10**9
 const MINIMAL_DENOM_LITERAL = 'ncheq'
 const GAS_PRICE = GasPrice.fromString( `25${MINIMAL_DENOM_LITERAL}` )
 
-const WITHDRAWAL_QUEUE_PREFIX = 'queue-1:'
 const MAX_PROCESSING_LIMIT = CF_NUMBER_OF_DISTRIBUTORS * CF_MAX_SAFE_TX_PER_BLOCK * 6 // With 6 being the *average* block time. Avoided to add another GraphQL call on top.
 const MNEMONICS = (function() {
   return String( CF_MNEMONICS ).split(',').map(
@@ -45,7 +44,7 @@ async function catch_rejections(callable) {
 }
 
 async function list_pending_transactions() {
-  return ( await withdrawal_queue_test.list( { prefix: `${WITHDRAWAL_QUEUE_PREFIX}`, limit: MAX_PROCESSING_LIMIT } ) ).keys
+  return ( await withdrawal_queue.list( { prefix: `${WITHDRAWAL_QUEUE_PREFIX}`, limit: MAX_PROCESSING_LIMIT } ) ).keys
 }
 
 async function process_transactions(keys) {
@@ -53,7 +52,7 @@ async function process_transactions(keys) {
 
   for( let [i, key] of keys.entries() ){
     const recipient = key.name
-    const pending_transaction = JSON.parse( await withdrawal_queue_test.get( recipient ) )
+    const pending_transaction = JSON.parse( await withdrawal_queue.get( recipient ) )
 
     transactions.push(
       {
@@ -105,12 +104,12 @@ async function execute_transactional_logic(transaction) {
 }
 
 async function enlist_successful_withdrawal(address, amount) {
-  let entry = JSON.parse( await reward_tiers_test.get( address ) )
+  let entry = JSON.parse( await reward_tiers.get( address ) )
 
   entry.pending = 0
   entry.withdrawn = Number( entry.withdrawn || 0 ) + Number( amount )
 
-  await reward_tiers_test.put( 
+  await reward_tiers.put( 
     address,
     JSON.stringify(
       entry
@@ -121,7 +120,7 @@ async function enlist_successful_withdrawal(address, amount) {
 }
 
 async function delete_processed_enqueued_transaction(address) {
-  await withdrawal_queue_test.delete( address )
+  await withdrawal_queue.delete( address )
 
   return true
 }

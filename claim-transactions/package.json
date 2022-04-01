@@ -10,8 +10,6 @@
     "build": "webpack",
     "preview": "workers-preview < dist/index.js"
   },
-  "author": "Tasos <50984242+Eengineer1@users.noreply.github.com>",
-  "license": "MIT",
   "devDependencies": {
     "prettier": "^1.18.2",
     "webpack-cli": "^4.9.2"

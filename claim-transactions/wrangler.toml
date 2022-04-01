@@ -1,5 +1,5 @@
 name = "claim-transactions"
-type = "javascript"
+type = "webpack"
 
 account_id = ""
 workers_dev = true
@@ -11,9 +11,6 @@ kv_namespaces = [
     { binding = "withdrawal_queue", id = "bd03245aabe145c19ab703cea48bd3c7", preview_id = "bd03245aabe145c19ab703cea48bd3c7" },
     { binding = "airdrop_denylist", id = "2978b679f1a4460abb99b8fe62c22f3e", preview_id = "2978b679f1a4460abb99b8fe62c22f3e" }
 ]
-
-[build]
-command = "npm install && npm run build"
 
 [build.upload]
 format = "service-worker"

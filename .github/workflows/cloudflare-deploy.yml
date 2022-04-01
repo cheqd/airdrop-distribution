@@ -8,9 +8,6 @@ on:
 jobs:
   publish-claim-tx:
     name: Publish Claim Transactions to Cloudflare
-    defaults:
-      run:
-        working-directory: claim-transactions
 
     runs-on: ${{ matrix.os }}
 
@@ -34,3 +31,4 @@ jobs:
           CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
+          workingDirectory: claim-transactions

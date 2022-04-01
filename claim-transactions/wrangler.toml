@@ -9,7 +9,8 @@ compatibility_date = "2022-03-15"
 
 kv_namespaces = [ 
     { binding = "reward_tiers_test", id = "d8a783f7388d4c6a8a34db1848326505", preview_id = "d8a783f7388d4c6a8a34db1848326505" },
-    { binding = "withdrawal_queue_test", id = "bd03245aabe145c19ab703cea48bd3c7", preview_id = "bd03245aabe145c19ab703cea48bd3c7" }
+    { binding = "withdrawal_queue_test", id = "bd03245aabe145c19ab703cea48bd3c7", preview_id = "bd03245aabe145c19ab703cea48bd3c7" },
+    { binding = "denylist", id = "f8abaa9af07f4521981d01b818acd046", preview_id = "f8abaa9af07f4521981d01b818acd046" }
 ]
 
 [build]

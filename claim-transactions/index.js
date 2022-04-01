@@ -51,7 +51,7 @@ async function handleRequest(request) {
 
     const withdrawal = await has_submitted_a_withdrawal( address )
 
-    if( withdrawal ) return new Response( JSON.stringify( { valid: true, withdrawn: true, message: MESSAGES.withdrawal } ), { headers: { ...CORS_HEADERS, ...HEADERS.json } } )
+    if( withdrawal ) return new Response( JSON.stringify( { valid: true, withdrawn: true, breakdown: calculate, message: MESSAGES.withdrawal } ), { headers: { ...CORS_HEADERS, ...HEADERS.json } } )
 
     return new Response(
       JSON.stringify(
@@ -116,11 +116,9 @@ function parse_url_to_base_class(url) {
 }
 
 async function is_denied(address) {
-  const denylist = Object.keys( JSON.parse( await reward_tiers_test.get( 'denylist' ) ) )
+  const denylisted = JSON.parse( await denylist.get( address ) )
 
-  for( let entry of denylist ){
-    if( entry === address ) return true
-  }
+  if( denylisted ) return true
 
   return false
 }

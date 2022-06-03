@@ -47,7 +47,7 @@ CF_RPC_ENDPOINT = "https://rpc.cheqd.net:443"
 CF_NUMBER_OF_DISTRIBUTORS = 2
 CF_MAX_SAFE_TX_PER_BLOCK = 2
 WITHDRAWAL_QUEUE_PREFIX = 'queue-3:'
-***REMOVED*** = ""
+CF_MNEMONICS = ""
 
 [triggers]
 crons = ["* * * * *"]

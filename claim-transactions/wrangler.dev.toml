@@ -3,8 +3,8 @@
 ###############################################################
 
 # Worker name
-name = "distributor-x"
-type = "webpack"
+name = "claim-transactions"
+type = "javascript"
 
 # Entrypoint/path to the file that will be executed
 main = "index.js"
@@ -37,20 +37,14 @@ workers_dev = true
 # @default `[]`
 kv_namespaces = [ 
     { binding = "reward_tiers", id = "", preview_id = "" },
-    { binding = "withdrawal_queue", id = "", preview_id = "" }
+    { binding = "withdrawal_queue", id = "", preview_id = "" },
+    { binding = "airdrop_denylist", id = "", preview_id = "" }
 ]
 
 # Map of environment variables to set when deploying the Worker
 # Not inherited. @default `{}`
 [vars]
-CF_RPC_ENDPOINT = "https://rpc.cheqd.net:443"
-CF_NUMBER_OF_DISTRIBUTORS = 2
-CF_MAX_SAFE_TX_PER_BLOCK = 2
-WITHDRAWAL_QUEUE_PREFIX = 'queue-3:'
-CF_MNEMONICS = ""
 
-[triggers]
-crons = ["* * * * *"]
 
 ###############################################################
 ###             SECTION 3: Local Development                ###
